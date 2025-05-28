@@ -4,6 +4,8 @@ import sys
 import pyautogui
 import cv2
 import numpy as np
+import threading
+import pyperclip
 &nbsp;
 &nbsp;
 
@@ -101,27 +103,69 @@ def open_link_and_click_buttons(link, quality):
 &nbsp;
 &nbsp;
 
+def collect_links(links):
+    print("\n=== Link Collection Mode ===")
+    print("Copy video links (Ctrl+C), type 'done' when finished.")
+&nbsp;
+&nbsp;
+
+    while True:
+        current_link = pyperclip.paste().strip()
+        if current_link and current_link not in links:
+            links.append(current_link)
+            print(f"Added link: {current_link}")
+        time.sleep(1)  # Check clipboard every second
+&nbsp;
+&nbsp;
+
 def main():
     install_package('pyautogui')
     install_package('opencv-python')
     install_package('numpy')
+    install_package('pyperclip')
 &nbsp;
 &nbsp;
 
-    # Specify the link to open
-    link = input("Enter the video link: ")
-    quality = input("Enter the desired download quality (360p, 720p, 1080p): ").strip()
+    links = []
 &nbsp;
 &nbsp;
 
-    # Validate quality input
-    if quality not in ['360p', '720p', '1080p']:
-        print("Invalid quality selected. Please enter 360p, 720p, or 1080p.")
-        return
+    # Start collecting links in a separate thread
+    link_thread = threading.Thread(target=collect_links, args=(links,))
+    link_thread.start()
 &nbsp;
 &nbsp;
 
-    open_link_and_click_buttons(link, quality)
+    # Wait for user to type 'done'
+    while True:
+        user_input = input("Type 'done' when you have finished copying links: ").strip().lower()
+        if user_input == 'done':
+            break
+&nbsp;
+&nbsp;
+
+    # Stop the link collection thread
+    link_thread.join()
+&nbsp;
+&nbsp;
+
+    # Proceed with the first link collected
+    if links:
+        link = links[0]  # Use the first collected link
+        quality = input("Enter the desired download quality (360p, 720p, 1080p): ").strip()
+&nbsp;
+&nbsp;
+
+        # Validate quality input
+        if quality not in ['360p', '720p', '1080p']:
+            print("Invalid quality selected. Please enter 360p, 720p, or 1080p.")
+            return
+&nbsp;
+&nbsp;
+
+        open_link_and_click_buttons(link, quality)
+    else:
+        print("No links were collected.")
 &nbsp;
 &nbsp;
 
