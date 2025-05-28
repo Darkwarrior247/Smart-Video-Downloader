@@ -26,3 +26,5 @@ A Python script that automates the process of downloading videos from provided l
 2. Install the required packages:
    ```bash
    pip install pyautogui opencv-python numpy pyperclip
+
+3. Enjoy ;)
