@@ -92,27 +92,24 @@ def click_button_with_opencv(template_path, threshold=0.8, max_tries=5):
 
 
 
-        # Optionally scale the template and check for matches at different sizes
-        for scale in [0.8, 1.0, 1.2]:  # Example scales
-            resized_template = cv2.resize(template, (int(w * scale), int(h * scale)))
-            res = cv2.matchTemplate(screenshot, resized_template, cv2.TM_CCOEFF_NORMED)
-            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+        res = cv2.matchTemplate(screenshot, template, cv2.TM_CCOEFF_NORMED)
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
 
 
 
-            print(f"Attempt {attempt+1}, Scale {scale}: Match confidence = {max_val:.2f}")
+        print(f"Attempt {attempt+1}: Match confidence = {max_val:.2f}")
 
 
 
-            if max_val >= threshold:
-                center_x = max_loc[0] + int(resized_template.shape[1] // 2)
-                center_y = max_loc[1] + int(resized_template.shape[0] // 2)
-                pyautogui.moveTo(center_x, center_y, duration=0.2)
-                pyautogui.click()
-                print(f"Clicked the button: {template_path}")
-                return True
-            else:
-                time.sleep(1)
+        if max_val >= threshold:
+            center_x = max_loc[0] + w // 2
+            center_y = max_loc[1] + h // 2
+            pyautogui.moveTo(center_x, center_y, duration=0.2)
+            pyautogui.click()
+            print(f"Clicked the button: {template_path}")
+            return True
+        else:
+            time.sleep(1)
     print(f"Button not found on screen: {template_path}")
     return False
 
@@ -123,21 +120,6 @@ def open_link_and_click_buttons(link, quality, download_choice):
     import webbrowser
     webbrowser.open(link)
     time.sleep(7)  # Wait for the page to load
-
-
-
-    # Click on HD-1 button
-    if not click_button_with_opencv("HD-1.png"):
-        print("HD-1 button not found, trying HD-2...")
-        click_button_with_opencv("HD-2.png")
-    time.sleep(2)
-
-
-
-    # Click on Play button
-    if not click_button_with_opencv("play.png"):
-        print("Play button not found.")
-    time.sleep(3)  # Wait for the video to start
 
 
 
@@ -179,6 +161,19 @@ def open_link_and_click_buttons(link, quality, download_choice):
 
 
 
+def open_idm_and_start_queue():
+    # Open Internet Download Manager
+    subprocess.Popen(["C:\\Program Files (x86)\\Internet Download Manager\\IDMan.exe"])  # Adjust the path if necessary
+    time.sleep(5)  # Wait for IDM to open
+
+
+
+    # Click the Start Queue button in IDM
+    if not click_button_with_opencv("start_queue.png"):  # Assuming the image is named "start_queue.png"
+        print("Start Queue button not found in IDM.")
+
+
+
 def main():
     install_package('pyautogui')
     install_package('opencv-python')
@@ -217,6 +212,11 @@ def main():
         # Close the current tab (if using a browser that supports this)
         pyautogui.hotkey('ctrl', 'w')  # Close the current tab
         time.sleep(1)  # Wait for the tab to close
+
+
+
+    if download_choice == 'later':
+        open_idm_and_start_queue()
 
 
 
