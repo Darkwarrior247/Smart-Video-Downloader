@@ -21,5 +21,5 @@ A Python script that automates the process of downloading videos from provided l
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/videodownloader.git
+   git clone https://github.com/Darkwarrior247/SmartVideoDownloader.git
    cd videodownloader
