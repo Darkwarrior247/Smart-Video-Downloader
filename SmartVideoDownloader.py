@@ -54,7 +54,7 @@ def click_button_with_opencv(template_path, threshold=0.8, max_tries=5):
 &nbsp;
 &nbsp;
 
-def open_link_and_click_buttons(link):
+def open_link_and_click_buttons(link, quality):
     # Open the link in the default web browser
     import webbrowser
     webbrowser.open(link)
@@ -79,6 +79,14 @@ def open_link_and_click_buttons(link):
     # Click on Download button
     if not click_button_with_opencv("download.png"):
         print("Download button not found.")
+        return
+&nbsp;
+&nbsp;
+
+    # Click on the selected quality button using OpenCV
+    quality_template = f"{quality}.png"  # Assuming quality images are named "360p.png", "720p.png", "1080p.png"
+    if not click_button_with_opencv(quality_template):
+        print(f"{quality} button not found.")
 &nbsp;
 &nbsp;
 
@@ -95,7 +103,18 @@ def main():
 
     # Specify the link to open
     link = input("Enter the video link: ")
-    open_link_and_click_buttons(link)
+    quality = input("Enter the desired download quality (360p, 720p, 1080p): ").strip()
+&nbsp;
+&nbsp;
+
+    # Validate quality input
+    if quality not in ['360p', '720p', '1080p']:
+        print("Invalid quality selected. Please enter 360p, 720p, or 1080p.")
+        return
+&nbsp;
+&nbsp;
+
+    open_link_and_click_buttons(link, quality)
 &nbsp;
 &nbsp;
 
