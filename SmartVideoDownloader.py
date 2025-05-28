@@ -197,14 +197,12 @@ def main():
 
 
 
-        quality = input("Enter the desired download quality (360p, 720p, 1080p): ").strip()
-
-
-
-        # Validate quality input
-        if quality not in ['360p', '720p', '1080p']:
-            print("Invalid quality selected. Please enter 360p, 720p, or 1080p.")
-            continue  # Ask for links again
+        while True:  # Loop for quality selection
+            quality = input("Enter the desired download quality (360p, 720p, 1080p): ").strip()
+            if quality in ['360p', '720p', '1080p']:
+                break  # Valid quality input, exit the loop
+            else:
+                print("Invalid quality selected. Please enter 360p, 720p, or 1080p.")
 
 
 
