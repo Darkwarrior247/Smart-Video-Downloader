@@ -189,46 +189,48 @@ def main():
 
 
 
-    links = get_user_links()
-    if not links:
-        print("No links collected.")
-        return
+    while True:  # Loop to keep asking for links until valid links are collected
+        links = get_user_links()
+        if not links:
+            print("No links collected. Please copy video links and type 'done' when finished.")
+            continue  # Ask for links again
 
 
 
-    quality = input("Enter the desired download quality (360p, 720p, 1080p): ").strip()
+        quality = input("Enter the desired download quality (360p, 720p, 1080p): ").strip()
 
 
 
-    # Validate quality input
-    if quality not in ['360p', '720p', '1080p']:
-        print("Invalid quality selected. Please enter 360p, 720p, or 1080p.")
-        return
+        # Validate quality input
+        if quality not in ['360p', '720p', '1080p']:
+            print("Invalid quality selected. Please enter 360p, 720p, or 1080p.")
+            continue  # Ask for links again
 
 
 
-    # Ask user for download preference
-    download_choice = input("Do you want to start the download now or download later? (Enter 'now' or 'later'): ").strip().lower()
+        # Ask user for download preference
+        download_choice = input("Do you want to start the download now or download later? (Enter 'now' or 'later'): ").strip().lower()
 
 
 
-    # Process each link one by one
-    for link in links:
-        print(f"Processing link: {link}")
-        open_link_and_click_buttons(link, quality, download_choice)
-        time.sleep(2)  # Wait a bit before closing the tab (if needed)
-        # Close the current tab (if using a browser that supports this)
-        pyautogui.hotkey('ctrl', 'w')  # Close the current tab
-        time.sleep(1)  # Wait for the tab to close
+        # Process each link one by one
+        for link in links:
+            print(f"Processing link: {link}")
+            open_link_and_click_buttons(link, quality, download_choice)
+            time.sleep(2)  # Wait a bit before closing the tab (if needed)
+            # Close the current tab (if using a browser that supports this)
+            pyautogui.hotkey('ctrl', 'w')  # Close the current tab
+            time.sleep(1)  # Wait for the tab to close
 
 
 
-    if download_choice == 'later':
-        open_idm_and_start_queue()
+        if download_choice == 'later':
+            open_idm_and_start_queue()
 
 
 
-    print("All links processed.")
+        print("All links processed.")
+        break  # Exit the loop after processing the links
 
 
 
