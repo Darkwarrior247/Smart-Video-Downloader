@@ -87,6 +87,13 @@ def open_link_and_click_buttons(link, quality):
     quality_template = f"{quality}.png"  # Assuming quality images are named "360p.png", "720p.png", "1080p.png"
     if not click_button_with_opencv(quality_template):
         print(f"{quality} button not found.")
+        return
+&nbsp;
+&nbsp;
+
+    # Click on Download Later button
+    if not click_button_with_opencv("download_later.png"):  # Assuming the image is named "download_later.png"
+        print("Download Later button not found.")
 &nbsp;
 &nbsp;
 
