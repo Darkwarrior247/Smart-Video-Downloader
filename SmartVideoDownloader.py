@@ -139,10 +139,12 @@ def open_and_click_video_buttons(links, video_quality='720p', language='en', con
 &nbsp;
 &nbsp;
 
-    # Set Firefox options
+    # Set Firefox options to use an existing profile
+    firefox_profile_path = r'path_to_your_firefox_profile'  # Replace with your profile path
     firefox_options = webdriver.FirefoxOptions()
     firefox_options.add_argument("--disable-notifications")
     firefox_options.add_argument("--mute-audio")
+    firefox_options.set_preference("profile", firefox_profile_path)
 &nbsp;
 &nbsp;
 
