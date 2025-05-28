@@ -8,6 +8,7 @@ import numpy as np
 import pyperclip
 
 
+
 def install_package(package):
     try:
         __import__(package)
@@ -114,7 +115,7 @@ def click_button_with_opencv(template_path, threshold=0.8, max_tries=5):
 
 
 
-def open_link_and_click_buttons(link, quality):
+def open_link_and_click_buttons(link, quality, download_choice):
     # Open the link in the default web browser
     import webbrowser
     webbrowser.open(link)
@@ -137,27 +138,26 @@ def open_link_and_click_buttons(link, quality):
 
 
 
-    # Ask user for download preference
-    download_choice = input("Do you want to download now or download later? (Enter 'now' or 'later'): ").strip().lower()
+    # Click on Download button
+    if not click_button_with_opencv("download.png"):
+        print("Download button not found.")
+        return
+
+
+
+    # Click on the selected quality button using OpenCV
+    quality_template = f"{quality}.png"  # Assuming quality images are named "360p.png", "720p.png", "1080p.png"
+    if not click_button_with_opencv(quality_template):
+        print(f"{quality} button not found.")
+        return
 
 
 
     if download_choice == 'now':
-        # Click on Download button
-        if not click_button_with_opencv("download.png"):
-            print("Download button not found.")
+        # Click on the Start Download button (assuming it's named "start_download.png")
+        if not click_button_with_opencv("start_download.png"):  # Add your start download image here
+            print("Start Download button not found.")
             return
-
-
-
-        # Click on the selected quality button using OpenCV
-        quality_template = f"{quality}.png"  # Assuming quality images are named "360p.png", "720p.png", "1080p.png"
-        if not click_button_with_opencv(quality_template):
-            print(f"{quality} button not found.")
-            return
-
-
-
         print("Download started. Check your download manager for progress.")
 
 
@@ -167,9 +167,6 @@ def open_link_and_click_buttons(link, quality):
         if not click_button_with_opencv("download_later.png"):  # Assuming the image is named "download_later.png"
             print("Download Later button not found.")
             return
-
-
-
         print("Video will be downloaded later. Check your download manager for progress.")
 
 
@@ -204,10 +201,15 @@ def main():
 
 
 
+    # Ask user for download preference
+    download_choice = input("Do you want to start the download now or download later? (Enter 'now' or 'later'): ").strip().lower()
+
+
+
     # Process each link one by one
     for link in links:
         print(f"Processing link: {link}")
-        open_link_and_click_buttons(link, quality)
+        open_link_and_click_buttons(link, quality, download_choice)
         time.sleep(2)  # Wait a bit before closing the tab (if needed)
         # Close the current tab (if using a browser that supports this)
         pyautogui.hotkey('ctrl', 'w')  # Close the current tab
