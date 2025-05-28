@@ -6,8 +6,7 @@ import pyautogui
 import cv2
 import numpy as np
 import pyperclip
-&nbsp;
-&nbsp;
+
 
 def install_package(package):
     try:
@@ -15,8 +14,8 @@ def install_package(package):
     except ImportError:
         print(f"Installing {package}...")
         subprocess.check_call([sys.executable, "-m", "pip", "install", package])
-&nbsp;
-&nbsp;
+
+
 
 def get_user_links():
     install_package('pyperclip')
@@ -24,13 +23,13 @@ def get_user_links():
     last_clipboard = ""
     paused = threading.Event()
     done_event = threading.Event()
-&nbsp;
-&nbsp;
+
+
 
     print("\n=== Link Collection Mode ===")
     print("Copy video links (Ctrl+C), type 'pause', 'resume', or 'done'.")
-&nbsp;
-&nbsp;
+
+
 
     def check_clipboard():
         nonlocal last_clipboard
@@ -44,13 +43,13 @@ def get_user_links():
                     last_clipboard = current_url
                     print(f"Added link {len(links)}: {current_url}")
             time.sleep(1)
-&nbsp;
-&nbsp;
+
+
 
     clipboard_thread = threading.Thread(target=check_clipboard, daemon=True)
     clipboard_thread.start()
-&nbsp;
-&nbsp;
+
+
 
     try:
         while True:
@@ -68,13 +67,13 @@ def get_user_links():
                 print("Resumed.")
     except KeyboardInterrupt:
         done_event.set()
-&nbsp;
-&nbsp;
+
+
 
     clipboard_thread.join()
     return links
-&nbsp;
-&nbsp;
+
+
 
 def click_button_with_opencv(template_path, threshold=0.8, max_tries=5):
     print(f"Looking for button using template: {template_path}")
@@ -83,23 +82,23 @@ def click_button_with_opencv(template_path, threshold=0.8, max_tries=5):
         print(f"Template image '{template_path}' not found or could not be loaded.")
         return False
     w, h = template.shape[::-1]
-&nbsp;
-&nbsp;
+
+
 
     for attempt in range(max_tries):
         screenshot = pyautogui.screenshot()
         screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2GRAY)
-&nbsp;
-&nbsp;
+
+
 
         res = cv2.matchTemplate(screenshot, template, cv2.TM_CCOEFF_NORMED)
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-&nbsp;
-&nbsp;
+
+
 
         print(f"Attempt {attempt+1}: Match confidence = {max_val:.2f}")
-&nbsp;
-&nbsp;
+
+
 
         if max_val >= threshold:
             center_x = max_loc[0] + w // 2
@@ -112,81 +111,98 @@ def click_button_with_opencv(template_path, threshold=0.8, max_tries=5):
             time.sleep(1)
     print(f"Button not found on screen: {template_path}")
     return False
-&nbsp;
-&nbsp;
+
+
 
 def open_link_and_click_buttons(link, quality):
     # Open the link in the default web browser
     import webbrowser
     webbrowser.open(link)
     time.sleep(7)  # Wait for the page to load
-&nbsp;
-&nbsp;
+
+
 
     # Click on HD-1 button
     if not click_button_with_opencv("HD-1.png"):
         print("HD-1 button not found, trying HD-2...")
         click_button_with_opencv("HD-2.png")
     time.sleep(2)
-&nbsp;
-&nbsp;
+
+
 
     # Click on Play button
     if not click_button_with_opencv("play.png"):
         print("Play button not found.")
     time.sleep(3)  # Wait for the video to start
-&nbsp;
-&nbsp;
 
-    # Click on Download button
-    if not click_button_with_opencv("download.png"):
-        print("Download button not found.")
-        return
-&nbsp;
-&nbsp;
 
-    # Click on the selected quality button using OpenCV
-    quality_template = f"{quality}.png"  # Assuming quality images are named "360p.png", "720p.png", "1080p.png"
-    if not click_button_with_opencv(quality_template):
-        print(f"{quality} button not found.")
-        return
-&nbsp;
-&nbsp;
 
-    # Click on Download Later button
-    if not click_button_with_opencv("download_later.png"):  # Assuming the image is named "download_later.png"
-        print("Download Later button not found.")
-&nbsp;
-&nbsp;
+    # Ask user for download preference
+    download_choice = input("Do you want to download now or download later? (Enter 'now' or 'later'): ").strip().lower()
 
-    print("All actions performed. Check your download manager for progress.")
-&nbsp;
-&nbsp;
+
+
+    if download_choice == 'now':
+        # Click on Download button
+        if not click_button_with_opencv("download.png"):
+            print("Download button not found.")
+            return
+
+
+
+        # Click on the selected quality button using OpenCV
+        quality_template = f"{quality}.png"  # Assuming quality images are named "360p.png", "720p.png", "1080p.png"
+        if not click_button_with_opencv(quality_template):
+            print(f"{quality} button not found.")
+            return
+
+
+
+        print("Download started. Check your download manager for progress.")
+
+
+
+    elif download_choice == 'later':
+        # Click on Download Later button
+        if not click_button_with_opencv("download_later.png"):  # Assuming the image is named "download_later.png"
+            print("Download Later button not found.")
+            return
+
+
+
+        print("Video will be downloaded later. Check your download manager for progress.")
+
+
+
+    else:
+        print("Invalid choice. Please enter 'now' or 'later'.")
+
+
 
 def main():
     install_package('pyautogui')
     install_package('opencv-python')
     install_package('numpy')
-&nbsp;
-&nbsp;
+
+
 
     links = get_user_links()
     if not links:
         print("No links collected.")
         return
-&nbsp;
-&nbsp;
+
+
 
     quality = input("Enter the desired download quality (360p, 720p, 1080p): ").strip()
-&nbsp;
-&nbsp;
+
+
 
     # Validate quality input
     if quality not in ['360p', '720p', '1080p']:
         print("Invalid quality selected. Please enter 360p, 720p, or 1080p.")
         return
-&nbsp;
-&nbsp;
+
+
 
     # Process each link one by one
     for link in links:
@@ -196,12 +212,12 @@ def main():
         # Close the current tab (if using a browser that supports this)
         pyautogui.hotkey('ctrl', 'w')  # Close the current tab
         time.sleep(1)  # Wait for the tab to close
-&nbsp;
-&nbsp;
+
+
 
     print("All links processed.")
-&nbsp;
-&nbsp;
+
+
 
 if __name__ == "__main__":
     main()
