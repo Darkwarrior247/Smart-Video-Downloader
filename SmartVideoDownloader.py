@@ -144,6 +144,7 @@ def open_link_and_click_buttons(link, quality, download_choice):
             print("Start Download button not found.")
             return
         print("Download started. Check your download manager for progress.")
+        minimize_idm()  # Minimize IDM after starting the download
 
 
 
@@ -158,6 +159,13 @@ def open_link_and_click_buttons(link, quality, download_choice):
 
     else:
         print("Invalid choice. Please enter 'now' or 'later'.")
+
+
+
+def minimize_idm():
+    # Click the minimize button in IDM
+    if not click_button_with_opencv("minimize_idm.png"):  # Assuming the image is named "minimize_idm.png"
+        print("Minimize button not found in IDM.")
 
 
 
