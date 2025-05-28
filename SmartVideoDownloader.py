@@ -206,8 +206,12 @@ def main():
 
 
 
-        # Ask user for download preference
-        download_choice = input("Do you want to start the download now or download later? (Enter 'now' or 'later'): ").strip().lower()
+        while True:  # Loop for download choice selection
+            download_choice = input("Do you want to start the download now or download later? (Enter 'now' or 'later'): ").strip().lower()
+            if download_choice in ['now', 'later']:
+                break  # Valid download choice, exit the loop
+            else:
+                print("Invalid choice. Please enter 'now' or 'later'.")
 
 
 
