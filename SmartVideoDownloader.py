@@ -1,10 +1,10 @@
 import time
 import subprocess
 import sys
+import threading
 import pyautogui
 import cv2
 import numpy as np
-import threading
 import pyperclip
 &nbsp;
 &nbsp;
@@ -18,7 +18,66 @@ def install_package(package):
 &nbsp;
 &nbsp;
 
+def get_user_links():
+    install_package('pyperclip')
+    links = []
+    last_clipboard = ""
+    paused = threading.Event()
+    done_event = threading.Event()
+&nbsp;
+&nbsp;
+
+    print("\n=== Link Collection Mode ===")
+    print("Copy video links (Ctrl+C), type 'pause', 'resume', or 'done'.")
+&nbsp;
+&nbsp;
+
+    def check_clipboard():
+        nonlocal last_clipboard
+        while not done_event.is_set():
+            if not paused.is_set():
+                current_url = pyperclip.paste().strip()
+                if (current_url.startswith(('http://', 'https://')) and
+                    current_url not in links and
+                    current_url != last_clipboard):
+                    links.append(current_url)
+                    last_clipboard = current_url
+                    print(f"Added link {len(links)}: {current_url}")
+            time.sleep(1)
+&nbsp;
+&nbsp;
+
+    clipboard_thread = threading.Thread(target=check_clipboard, daemon=True)
+    clipboard_thread.start()
+&nbsp;
+&nbsp;
+
+    try:
+        while True:
+            user_input = input().lower()
+            if user_input == 'done':
+                done_event.set()
+                break
+            elif user_input == 'pause':
+                paused.set()
+                print("Paused.")
+            elif user_input == 'resume':
+                paused.clear()
+                pyperclip.copy('')
+                last_clipboard = ""
+                print("Resumed.")
+    except KeyboardInterrupt:
+        done_event.set()
+&nbsp;
+&nbsp;
+
+    clipboard_thread.join()
+    return links
+&nbsp;
+&nbsp;
+
 def click_button_with_opencv(template_path, threshold=0.8, max_tries=5):
+    print(f"Looking for button using template: {template_path}")
     template = cv2.imread(template_path, cv2.IMREAD_GRAYSCALE)
     if template is None:
         print(f"Template image '{template_path}' not found or could not be loaded.")
@@ -66,7 +125,8 @@ def open_link_and_click_buttons(link, quality):
 
     # Click on HD-1 button
     if not click_button_with_opencv("HD-1.png"):
-        print("HD-1 button not found.")
+        print("HD-1 button not found, trying HD-2...")
+        click_button_with_opencv("HD-2.png")
     time.sleep(2)
 &nbsp;
 &nbsp;
@@ -103,69 +163,43 @@ def open_link_and_click_buttons(link, quality):
 &nbsp;
 &nbsp;
 
-def collect_links(links):
-    print("\n=== Link Collection Mode ===")
-    print("Copy video links (Ctrl+C), type 'done' when finished.")
-&nbsp;
-&nbsp;
-
-    while True:
-        current_link = pyperclip.paste().strip()
-        if current_link and current_link not in links:
-            links.append(current_link)
-            print(f"Added link: {current_link}")
-        time.sleep(1)  # Check clipboard every second
-&nbsp;
-&nbsp;
-
 def main():
     install_package('pyautogui')
     install_package('opencv-python')
     install_package('numpy')
-    install_package('pyperclip')
 &nbsp;
 &nbsp;
 
-    links = []
+    links = get_user_links()
+    if not links:
+        print("No links collected.")
+        return
 &nbsp;
 &nbsp;
 
-    # Start collecting links in a separate thread
-    link_thread = threading.Thread(target=collect_links, args=(links,))
-    link_thread.start()
+    quality = input("Enter the desired download quality (360p, 720p, 1080p): ").strip()
 &nbsp;
 &nbsp;
 
-    # Wait for user to type 'done'
-    while True:
-        user_input = input("Type 'done' when you have finished copying links: ").strip().lower()
-        if user_input == 'done':
-            break
+    # Validate quality input
+    if quality not in ['360p', '720p', '1080p']:
+        print("Invalid quality selected. Please enter 360p, 720p, or 1080p.")
+        return
 &nbsp;
 &nbsp;
 
-    # Stop the link collection thread
-    link_thread.join()
-&nbsp;
-&nbsp;
-
-    # Proceed with the first link collected
-    if links:
-        link = links[0]  # Use the first collected link
-        quality = input("Enter the desired download quality (360p, 720p, 1080p): ").strip()
-&nbsp;
-&nbsp;
-
-        # Validate quality input
-        if quality not in ['360p', '720p', '1080p']:
-            print("Invalid quality selected. Please enter 360p, 720p, or 1080p.")
-            return
-&nbsp;
-&nbsp;
-
+    # Process each link one by one
+    for link in links:
+        print(f"Processing link: {link}")
         open_link_and_click_buttons(link, quality)
-    else:
-        print("No links were collected.")
+        time.sleep(2)  # Wait a bit before closing the tab (if needed)
+        # Close the current tab (if using a browser that supports this)
+        pyautogui.hotkey('ctrl', 'w')  # Close the current tab
+        time.sleep(1)  # Wait for the tab to close
+&nbsp;
+&nbsp;
+
+    print("All links processed.")
 &nbsp;
 &nbsp;
 
